@@ -25,11 +25,11 @@ int main(){
     while (option != 0)
     {
         if(option>=0 && option<=6){
-            s = InputValues(&s);
+            // s = InputValues(&s);
             printf("%ld\n", Operation(option, &s));
             printf("Deseja salvar o valor para continuar a operação ou realizar uma com novo valores?\n0 -  Nova operação\n1 - Salvar valor\n");
             scanf("%d", &isValueSaved);
-            if(isValueSaved == 0) popValueStackDouble(&s);
+            if(isValueSaved == 0 && !isStackEmpty(&s)) popValueStackDouble(&s);
         }else{
             printf("Digite um valor válido. ");
         }
@@ -111,31 +111,44 @@ void Sort(long int *x){
 
 long int Operation(int option, Stack *s){
     long int num1, num2, result;
-    num2 = popValueStackDouble(s);
-    num1 = popValueStackDouble(s);
     switch(option){
         case 1:
+            InputValues(s);
+            num2 = popValueStackDouble(s);
+            num1 = popValueStackDouble(s);
             result = Sum(num1, num2);
             pushValueStackDouble(s, result);
             return result;
         case 2:
+            InputValues(s);
+            num2 = popValueStackDouble(s);
+            num1 = popValueStackDouble(s);
             result = Sub(num1, num2);
             pushValueStackDouble(s, result);
             return result;
         case 3:
+            InputValues(s);
+            num2 = popValueStackDouble(s);
+            num1 = popValueStackDouble(s);
             result = Mult(num1, num2);
             pushValueStackDouble(s, result);
             return result;
         case 4:
+            InputValues(s);
+            num2 = popValueStackDouble(s);
+            num1 = popValueStackDouble(s);
             result = Div(num1, num2);
             pushValueStackDouble(s, result);
             return result;
         case 5:
+            InputValues(s);
+            num2 = popValueStackDouble(s);
+            num1 = popValueStackDouble(s);
             result = Module(num1, num2);
             pushValueStackDouble(s, result);
             return result;
         case 6:
-            long int x[]= { 10, 7, 8, 1, 1000, 9, 4, 14, 0 };
+            long int x[]= { 10, 7, 8, 1, 1000, 9, 4, 14, 13};
             Sort(x);
             return 0.0; //alterar para função de sort;
         default:
