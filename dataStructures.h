@@ -33,7 +33,9 @@ BndType popValueStackQuickSort(Stack *s);
 
 void freeStack(Stack *stack);
 
-int partition(long int *arr, int il, int ih);
-void quick_sort(long int *arr, int il, int ih);
+// int partition(long int *arr, int il, int ih);
+void partition(long int *arr, int lb, int ub, int *pj);
+// void quick_sort(long int *arr, int il, int ih);
+void quick_sort(long int *arr, int n);
 
 #endif

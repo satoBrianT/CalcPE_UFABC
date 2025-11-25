@@ -102,7 +102,7 @@ void Sort(long int *x){
     // int len = sizeof(*x) / sizeof(x[0]);
     // printf("size: %d\n", len);
 
-    quick_sort(x, 0, 9);
+    quick_sort(x, 9);
 
     for(int i=0; i<9; i++){
         printf("%ld ", x[i]);
