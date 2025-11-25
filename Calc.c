@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <math.h>
-#include "stack.h"
-#include "quickSort.h"
+#include "dataStructures.h"
+// #include "stack.c"
+// #include "quickSort.c"
+
 
 int OperationSelector();
 long int Sum(long int num1, long int num2);
@@ -97,11 +99,12 @@ long int Module(long int num1, long int num2){
 }
 
 void Sort(long int *x){
-    int len = sizeof(*x) / sizeof(x[0]);
+    // int len = sizeof(*x) / sizeof(x[0]);
+    // printf("size: %d\n", len);
 
-    quick_sort(x, 0, len-1);
+    quick_sort(x, 0, 9);
 
-    for(int i=0; i<len; i++){
+    for(int i=0; i<9; i++){
         printf("%ld ", x[i]);
     }
 }

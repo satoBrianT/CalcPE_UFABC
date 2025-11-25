@@ -1,28 +1,10 @@
-#ifndef STACK_H_
-#define STACK_H_
-#define MAX_STACK_SIZE 256
+#include "dataStructures.h"
 #include <stdlib.h>
 #include <stdio.h>
 
-typedef struct {
-    int lb;
-    int ub;
-} BndType;
-
-typedef union {
-    long int items[MAX_STACK_SIZE];
-    BndType bounds[MAX_STACK_SIZE];
-}StackTypes;
-
-
-typedef struct {
-    StackTypes *data;
-    long int top;
-} Stack;
-
 void initializeStack(Stack *stack) {
     stack->data = malloc(sizeof(StackTypes));
-    stack->top = -1;  
+    stack->top = -1;
 }
 
 int isStackEmpty(Stack *s){
@@ -77,4 +59,35 @@ void freeStack(Stack *stack) {  // NOVO: Liberar memória
     free(stack->data);
 }
 
-#endif
+int partition(long int *arr, int il, int ih){
+    long int pivot, temp;
+    int i;
+    // temp = (long int*)malloc(ih * (sizeof(long int)));
+
+    pivot = arr[ih];
+    i = (il - 1);
+
+    for(int j = il; j<=ih; j++){
+        if(arr[j]<pivot){
+            i++;
+            temp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = temp;
+        }
+    }
+    temp = arr[ih];
+    arr[ih] = arr[i+1];
+    arr[i+1] = temp;
+
+    return i+1;
+}
+
+void quick_sort(long int *arr, int il, int ih){
+    long int pivot;
+    if(il<ih){
+        pivot = partition(arr, il, ih);
+        quick_sort(arr, il, pivot-1);
+        quick_sort(arr, pivot+1, ih);
+    }
+}
+
