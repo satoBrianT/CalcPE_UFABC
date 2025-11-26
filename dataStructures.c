@@ -15,7 +15,7 @@ int isStackFull(Stack *s){
     return s->top == MAX_STACK_SIZE - 1;
 };
 
-void pushValueStackDouble(Stack *s, long int value){
+void pushValueStackInt(Stack *s, long int value){
     if(isStackFull(s)){
         printf("Error: Stack overflow");
         exit(1);
@@ -33,7 +33,7 @@ void pushValuesQuickSort(Stack *s, BndType value){
     // printf("Valor adicionado a pilha: %d\n",value);
 }
 
-double popValueStackDouble(Stack *s){
+double popValueStackInt(Stack *s){
     if(isStackEmpty(s)){
         printf("ERRO: Stack underflow");
         exit(1);
@@ -59,40 +59,8 @@ void freeStack(Stack *stack) {  // NOVO: Liberar memória
     free(stack->data);
 }
 
-// int partition(long int *arr, int il, int ih){
-//     long int pivot, temp;
-//     int i;
-//     // temp = (long int*)malloc(ih * (sizeof(long int)));
-
-//     pivot = arr[ih];
-//     i = (il - 1);
-
-//     for(int j = il; j<=ih; j++){
-//         if(arr[j]<pivot){
-//             i++;
-//             temp = arr[i];
-//             arr[i] = arr[j];
-//             arr[j] = temp;
-//         }
-//     }
-//     temp = arr[ih];
-//     arr[ih] = arr[i+1];
-//     arr[i+1] = temp;
-
-//     return i+1;
-// }
-
-// void quick_sort(long int *arr, int il, int ih){
-//     long int pivot;
-//     if(il<ih){
-//         pivot = partition(arr, il, ih);
-//         quick_sort(arr, il, pivot-1);
-//         quick_sort(arr, pivot+1, ih);
-//     }
-// }
-
 void partition(long int *arr, int lb, int ub, int *pj) {
-    long int a = arr[lb];
+    long int a = arr[lb], temp;
     int down = lb;
     int up = ub;
     
@@ -100,7 +68,7 @@ void partition(long int *arr, int lb, int ub, int *pj) {
         while (arr[down] <= a && down < ub) down++;
         while (arr[up] > a) up--;
         if (down < up) {
-            double temp = arr[down];
+            temp = arr[down];
             arr[down] = arr[up];
             arr[up] = temp;
         }

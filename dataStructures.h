@@ -25,10 +25,10 @@ void initializeStack(Stack *stack);
 int isStackEmpty(Stack *s);
 int isStackFull(Stack *s);
 
-void pushValueStackDouble(Stack *s, long int value);
+void pushValueStackInt(Stack *s, long int value);
 void pushValuesQuickSort(Stack *s, BndType value);
 
-double popValueStackDouble(Stack *s);
+double popValueStackInt(Stack *s);
 BndType popValueStackQuickSort(Stack *s);
 
 void freeStack(Stack *stack);
