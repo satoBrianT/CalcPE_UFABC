@@ -33,7 +33,7 @@ void pushValuesQuickSort(Stack *s, BndType value){
     // printf("Valor adicionado a pilha: %d\n",value);
 }
 
-double popValueStackInt(Stack *s){
+long int popValueStackInt(Stack *s){
     if(isStackEmpty(s)){
         printf("ERRO: Stack underflow");
         exit(1);

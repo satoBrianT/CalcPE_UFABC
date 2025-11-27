@@ -4,7 +4,9 @@
 // #include "stack.c"
 // #include "quickSort.c"
 
-
+/*
+Prototipos das funções
+*/
 int OperationSelector();
 int InputTypeSelector();
 long int Sum(long int num1, long int num2);
@@ -12,34 +14,59 @@ long int Sub(long int num1, long int num2);
 long int Mult(long int num1, long int num2);
 long int Div(long int num1, long int num2);
 long int Module(long int num1, long int num2);
-void Sort(long int *x);
-void Operation(int option, Stack *s);
+void Sort(Stack *s, int inputType);
+void Operation(int option, Stack *s, int inputType);
 void FileReader(Stack *s, Stack *sAux);
-void FileOutput(Stack *s, int operation);
-Stack InputValues(Stack *s);
+void FileOutput(Stack *s, Stack *sAux, int operation);
+void InputValues(Stack *s, int option);
 
 int main(){
     int option, typeInput, isValueSaved; 
-    Stack s;
+    Stack s, sAux;
     initializeStack(&s);
+    initializeStack(&sAux);
 
-    FileReader();
-
+    //seleção inicial de operação
     option = OperationSelector();
-
+    //enquanto o usuário não optar por encerrar (inserir 0) o pograma continuara rodando
     while (option != 0)
     {
+        //garantir que o valor inserido seja igual uma operação aceita
         if(option>=0 && option<=6){
-            // s = InputValues(&s);
-            Operation(option, &s);
-            printf("\nDeseja salvar o valor para continuar a operacao ou realizar uma com novo valores?\n0 -  Nova operação\n1 - Salvar valor\n");
-            scanf("%d", &isValueSaved);
-            if(isValueSaved == 0 && !isStackEmpty(&s)) popValueStackInt(&s);
+            //selecionar se a operação será feita em por arquivo ou console
+            typeInput = InputTypeSelector();
+            if(typeInput == 1){
+                InputValues(&s, option);
+            }else{
+                FileReader(&s, &sAux); //função para leitura do arquivo
+            }
+            Operation(option, &s, typeInput); //realização da operação após os valores seres ajustados na pilha
+            if(typeInput == 2){
+                FileOutput(&s, &sAux, option);//saida caso o input tenha sido um arquivo
+                printf("\nDeseja salvar o valor para continuar a operacao ou realizar uma com novo valores ou encerrar o programa?\n0 - Finalizar;\n1 -  Nova operação.\n");
+            }else{
+                printf("\nDeseja salvar o valor para continuar a operacao ou realizar uma com novo valores ou encerrar o programa?\n0 - Finalizar;\n1 -  Nova operação;\n2 - Salvar valor.\n");
+            }
+            scanf("%d", &isValueSaved); //validar se a operacao sera continuada ou finalizada
+            if(isValueSaved == 1 && !isStackEmpty(&s)){
+                while (!isStackEmpty(&s) && !isStackEmpty(&sAux)) {
+                    popValueStackInt(&s);
+                    popValueStackInt(&sAux);
+                };
+            };
+            if(isValueSaved == 0){
+                printf("Programa encerrado\n");
+                freeStack(&s);
+                freeStack(&sAux);
+                return 0;
+            };
         }else{
             printf("Digite um valor válido. ");
-        }
+        };
         option = OperationSelector();
     }
+    freeStack(&s); //liberação da memória alocada na heap para as estruturas de pilha
+    freeStack(&sAux);
     return 0;
 }
 
@@ -85,35 +112,12 @@ int InputTypeSelector(){
     printf("Entrada será por teclado ou arquivo: \n");
     printf("1 - Teclado;\n2 - Arquivo;\n");
     scanf("%d", &option);
-    return option;
-}
-
-void ExecuteOperation(int option, int inputType, Stack *s){
-    while (option != 0)
-    {
-        if(option>=0 && option<=6){
-            // s = InputValues(&s);
-            if(inputType == 2){
-                Stack sAux;
-                initializeStack(sAux);
-                FileReader(s, sAux);
-                while (s->top > 0)
-                {
-                  Operation(option, &s);
-                }
-                pushValueStackInt(&sAux, popValueStackInt(&s));
-
-                
-            }
-            Operation(option, &s);
-            printf("\nDeseja salvar o valor para continuar a operacao ou realizar uma com novo valores?\n0 -  Nova operação\n1 - Salvar valor\n");
-            scanf("%d", &isValueSaved);
-            if(isValueSaved == 0 && !isStackEmpty(&s)) popValueStackInt(&s);
-        }else{
-            printf("Digite um valor válido. ");
-        }
-        option = OperationSelector();
+    while(option<1 || option>2){
+        printf("Selecione uma operaçao valida: \n");
+        printf("1 - Teclado;\n2 - Arquivo;\n");
+        scanf("%d", &option);
     }
+    return option;
 }
 
 long int Sum(long int num1, long int num2){
@@ -140,92 +144,162 @@ long int Module(long int num1, long int num2){
     return num1%num2;
 }
 
-void Sort(long int *x){
-    // int len = sizeof(*x) / sizeof(x[0]);
-    // printf("size: %d\n", len);
-    quick_sort(x, 9);
-    printf("Ordenado: ");
-    for(int i=0; i<9; i++){
-        printf("%ld ", x[i]);
+/*
+funcao de sorteamento, recebe como paramentro uma Stack para ser usada posteriormente e o tipo de input;
+caso o input tenha sido por arquivo sera feita somente a ordenacao;
+caso contrario, os numeros serao printados no console.
+*/
+void Sort(Stack *s, int inputType){
+    int size = s->top + 1;
+    long int *arr = (long int *)malloc(size * sizeof(long int));
+    int lastIndex = s->top;
+    while (!isStackEmpty(s)){
+        arr[s->top] = popValueStackInt(s);
+    };
+    //a funcao quick_sort é feita em uma library personalizada sendo chamada pelo arquivo de headers
+    quick_sort(arr, size);
+    if(inputType == 1){
+        printf("Ordenado: ");
+        for(int i=0; i<size; i++){
+            printf("%ld ", arr[i]);
+        };
+    };
+    /*
+    A ordemd de leitura e priordade de uma pilha eh inversa de um vetor;
+    Desta maneira, sabendo o tamanho do vetor, le-se do ultimo index, e empilhando os valores manualmente na pilha;
+    */
+    for(int i=lastIndex; i>=0; i--){
+        pushValueStackInt(s,arr[i]);
     }
+    free(arr);
 }
 
-void Operation(int option, Stack *s){
+void Operation(int option, Stack *s, int inputType){
     long int num1, num2, result;
-    // long int x[]= { 10, 7, 8, 1, 1000, 9, 4, 14, 13};
     switch(option){
         case 1:
-            InputValues(s);
-            num2 = popValueStackInt(s);
-            num1 = popValueStackInt(s);
-            result = Sum(num1, num2);
-            pushValueStackInt(s, result);
-            printf("%ld+%ld = %ld", num1, num2, result);
-            // return result;
+            if(inputType == 1){
+                num2 = popValueStackInt(s);
+                num1 = popValueStackInt(s);
+                result = Sum(num1, num2);
+                printf("%ld+%ld = %ld", num1, num2, result);
+                pushValueStackInt(s, result);
+            }else{
+                while (s->top>0){
+                    num2 = popValueStackInt(s);
+                    num1 = popValueStackInt(s);                    
+                    result = Sum(num2, num1);
+                    pushValueStackInt(s, result);
+                } 
+            }
             break;
         case 2:
-            InputValues(s);
-            num2 = popValueStackInt(s);
-            num1 = popValueStackInt(s);
-            result = Sub(num1, num2);
-            pushValueStackInt(s, result);
-            printf("%ld-%ld = %ld", num1, num2, result);
-            // return result;
+            if(inputType == 1){
+                num2 = popValueStackInt(s);
+                num1 = popValueStackInt(s);
+                result = Sub(num1, num2);
+                pushValueStackInt(s, result);
+                printf("%ld-%ld = %ld", num1, num2, result);
+            }else{
+                while (s->top>0){
+                    num2 = popValueStackInt(s);
+                    num1 = popValueStackInt(s);                    
+                    result = Sub(num2, num1);
+                    pushValueStackInt(s, result);
+                } 
+            }
             break;
         case 3:
-            InputValues(s);
-            num2 = popValueStackInt(s);
-            num1 = popValueStackInt(s);
-            result = Mult(num1, num2);
-            pushValueStackInt(s, result);
-            printf("%ld*%ld = %ld", num1, num2, result);
-            // return result;
+            if(inputType == 1){
+                num2 = popValueStackInt(s);
+                num1 = popValueStackInt(s);     
+                result = Mult(num1, num2);
+                pushValueStackInt(s, result);
+                printf("%ld*%ld = %ld", num1, num2, result);
+            }else{
+                while (s->top>0){
+                    num2 = popValueStackInt(s);
+                    num1 = popValueStackInt(s);                    
+                    result = Mult(num2, num1);
+                    pushValueStackInt(s, result);
+                }
+            }
             break;
         case 4:
-            InputValues(s);
-            num2 = popValueStackInt(s);
-            num1 = popValueStackInt(s);
-            result = Div(num1, num2);
-            pushValueStackInt(s, result);
-            printf("%ld/%ld = %ld", num1, num2, result);
-            // return result;
+            if(inputType == 1){
+                num2 = popValueStackInt(s);
+                num1 = popValueStackInt(s);
+                result = Div(num1, num2);
+                pushValueStackInt(s, result);
+                printf("%ld/%ld = %ld", num1, num2, result);
+            }else{
+                while (s->top>0){
+                    num2 = popValueStackInt(s);
+                    num1 = popValueStackInt(s);                    
+                    result = Div(num2, num1);
+                    pushValueStackInt(s, result);
+                }
+            }
             break;
         case 5:
-            InputValues(s);
-            num2 = popValueStackInt(s);
-            num1 = popValueStackInt(s);
-            result = Module(num1, num2);
-            pushValueStackInt(s, result);
-            printf("Resto de %ld/%ld: %ld", num1, num2, result);
-            // return result;
+            if(inputType == 1){
+                num2 = popValueStackInt(s);
+                num1 = popValueStackInt(s);
+                result = Module(num1, num2);
+                pushValueStackInt(s, result);
+                printf("Resto de %ld/%ld: %ld", num1, num2, result);
+            }else{
+                while (s->top>0){
+                    num2 = popValueStackInt(s);
+                    num1 = popValueStackInt(s);                    
+                    result = Div(num2, num1);
+                    pushValueStackInt(s, result);
+                }
+            }
             break;
         case 6:
-            Sort(x);
-            break; //alterar para função de sort;
+            Sort(s, inputType);
+            break;
         default:
             break;
     }
 };
-
-Stack InputValues(Stack *s){
+/*
+Funcao para receber os inputs do usuario;
+Caso a operacao selecionada tenha sido a ordenacao, a insercao precisa ser feita com no minimo 10 numeros;
+*/
+void InputValues(Stack *s,int option){
     long int num1, num2;
-    if(isStackEmpty(s)){
+    if(isStackEmpty(s) && option != 6 ){
         printf("Insira o primeiro valor: ");
         scanf("%ld", &num1);
         pushValueStackInt(s, num1);
         printf("Insira o segundo valor: ");
         scanf("%ld", &num2);
         pushValueStackInt(s, num2);
-
-        return *s;
+    }else if (isStackEmpty(s) && option == 6){
+        num1 = 1;
+        while (num1 != 0 ){ //este loop garante que os 10 numeros serao inseridos na pilha
+            while(s->top<8){
+                printf("Adicione um numero: ");
+                scanf("%ld", &num2);
+                pushValueStackInt(s, num2);
+            };
+            printf("Adicione um numero: ");
+            scanf("%ld", &num2);
+            pushValueStackInt(s, num2);
+            printf("Deseja adicionar mais?\n 0-Não;\n 1-Sim;\n ");
+            scanf("%ld", &num1);
+        }
+    }else{
+        printf("Insira novo valor: ");
+        scanf("%ld", &num1);
+        pushValueStackInt(s, num1);
     }
-    printf("Insira novo valor: ");
-    scanf("%ld", &num1);
-    pushValueStackInt(s, num1);
-
-    return *s;
 }
-
+/*
+funcao que fara a leitura do arquivo, pelo seu nome;
+*/
 void FileReader(Stack *s, Stack *sAux){
     char fileName[100];
     long int * buffer = NULL, aux;
@@ -244,12 +318,11 @@ void FileReader(Stack *s, Stack *sAux){
     while (fscanf(pFile, "%li", &aux)!= EOF){
         file_size ++;
     }
-    
 
     rewind(pFile);
     buffer = ( long int *) malloc ( sizeof ( long int ) * ( file_size + 1) );
     if ( buffer == NULL ) {
-        printf (" Erro de alocacao de memoria.\n") ;
+        printf ("Erro de alocacao de memoria.\n") ;
         fclose (pFile);
         exit(1);
     }
@@ -260,9 +333,7 @@ void FileReader(Stack *s, Stack *sAux){
             break;
         }
     }
-
     for (int i = file_size-1; i>=0; i--) {
-        printf("%ld\n", buffer[i]);
         pushValueStackInt(s,buffer[i]);
         pushValueStackInt(sAux,buffer[i]);
     }
@@ -270,44 +341,77 @@ void FileReader(Stack *s, Stack *sAux){
     free(buffer);
 }
 
-void FileOutput(Stack *s, int operation){
-    FILE *pFile = fopen("resultado.txt", "w");
+/*
+esta funcao formata o que sera escrito no arquvivo de saida, baseado na operacao selecionada pelo usuario
+*/
+void FileOutput(Stack *s, Stack *sAux, int operation){
+    char fileName[100];
+    long int result;
+    printf("\nDigite o nome do arquivo de saida (adicione a extensão (EX.: .txt)): ");
+    scanf( "%s", fileName);
+
+    FILE *pFile = fopen(fileName, "w");
     if(pFile == NULL){
-        printf("ERROR: Nao foi possivel abrir o arquivo.")
+        printf("ERROR: Nao foi possivel abrir o arquivo.");
         exit(1);
     }
     long int *arr = (long int*)malloc(((s->top)+1) * sizeof(long int));
-    long int result =  popValueStackInt(&s);
     int control = 0;
-    while (!isStackEmpty(&s)) {
-        arr[control] = popValueStackInt(&s);
-        control++
-    }
+    if(operation != 6){
+        result =  (!isStackEmpty(s)) ? popValueStackInt(s) : 0;
+        
+        while (!isStackEmpty(sAux)) {
+            arr[control] = popValueStackInt(sAux);
+            control++;
+        }
+    }else{
+        while (!isStackEmpty(s)) {
+            arr[control] = popValueStackInt(s);
+            control++;
+        }
+    };
 
-    if(control > 0){
-        fprintf(pFile, "%ld", arr[0]);
-    }
-    for(int i = 1; i<control, i++){
+    for(int i = 0; i<control; i++){
         switch (operation)
         {
         case 1:
-            fprintf(pFile, " + %ld", arr[i]);
+            if(i!=0) {
+                fprintf(pFile, " + %ld", arr[i]);
+            }else{
+                fprintf(pFile, "%ld", arr[i]);
+            }
             if (i==control-1) fprintf(pFile, " = %ld", result);
             break;
         case 2:
-            fprintf(pFile, " - %ld", arr[i]);
+            if(i==0){
+                fprintf(pFile, "%ld", arr[i]);
+            }else{
+                fprintf(pFile, " - %ld", arr[i]);
+            }
             if (i==control-1) fprintf(pFile, " = %ld", result);
             break;
         case 3:
-            fprintf(pFile, " * %ld", arr[i]);
+            if(i==0){
+                fprintf(pFile, "%ld", arr[i]);
+            }else{
+                fprintf(pFile, " * %ld", arr[i]);
+            } 
             if (i==control-1) fprintf(pFile, " = %ld", result);
             break;
         case 4:
-            fprintf(pFile, " / %ld", arr[i]);
+            if(i==0){
+                fprintf(pFile, "%ld", arr[i]);
+            }else{
+                fprintf(pFile, " / %ld", arr[i]);
+            } 
             if (i==control-1) fprintf(pFile, " = %ld", result);
             break;
         case 5:
-            fprintf(pFile, " / %ld", arr[i]);
+            if(i==0){
+                fprintf(pFile, "%ld", arr[i]);
+            }else{
+                fprintf(pFile, " / %ld", arr[i]); 
+            }
             if (i==control-1) fprintf(pFile, " = %ld", result);
             break;       
         case 6:
@@ -317,7 +421,6 @@ void FileOutput(Stack *s, int operation){
             break;
         }
     }
-
     fclose(pFile);
     free(arr);
 }

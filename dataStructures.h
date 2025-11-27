@@ -28,7 +28,7 @@ int isStackFull(Stack *s);
 void pushValueStackInt(Stack *s, long int value);
 void pushValuesQuickSort(Stack *s, BndType value);
 
-double popValueStackInt(Stack *s);
+long int popValueStackInt(Stack *s);
 BndType popValueStackQuickSort(Stack *s);
 
 void freeStack(Stack *stack);
