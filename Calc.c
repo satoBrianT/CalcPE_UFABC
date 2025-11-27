@@ -301,7 +301,7 @@ void InputValues(Stack *s,int option){
 funcao que fara a leitura do arquivo, pelo seu nome;
 */
 void FileReader(Stack *s, Stack *sAux){
-    char fileName[100];
+    char fileName[400];
     long int * buffer = NULL, aux;
     long file_size;
     FILE *pFile;
@@ -345,7 +345,7 @@ void FileReader(Stack *s, Stack *sAux){
 esta funcao formata o que sera escrito no arquvivo de saida, baseado na operacao selecionada pelo usuario
 */
 void FileOutput(Stack *s, Stack *sAux, int operation){
-    char fileName[100];
+    char fileName[400];
     long int result;
     printf("\nDigite o nome do arquivo de saida (adicione a extensão (EX.: .txt)): ");
     scanf( "%s", fileName);
