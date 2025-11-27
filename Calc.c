@@ -277,7 +277,7 @@ void InputValues(Stack *s,int option){
         printf("Insira o segundo valor: ");
         scanf("%ld", &num2);
         pushValueStackInt(s, num2);
-    }else if (isStackEmpty(s) && option == 6){
+    }else if (s->top<9 && option == 6){
         num1 = 1;
         while (num1 != 0 ){ //este loop garante que os 10 numeros serao inseridos na pilha
             while(s->top<8){
